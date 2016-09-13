@@ -23,6 +23,7 @@ import os
 
 
 from .compute import ComputeConflict
+from .ports.port_factory import PortFactory
 from ..utils.images import images_directories
 from ..utils.qt import qt_font_to_style
 
@@ -70,7 +71,12 @@ class Node:
         self._y = 0
         self._z = 0
         self._symbol = None
-        self._port_name_format = "Ethernet{0}"
+        if node_type == "iou":
+            self._port_name_format = "Ethernet{adapter}/{port}"
+            self._port_by_adapter = 4
+        else:
+            self._port_name_format = "Ethernet{0}"
+            self._port_by_adapter = 1
         self._port_segment_size = 0
         self._first_port_name = None
 
@@ -450,6 +456,52 @@ class Node:
         """
         return (yield from self._compute.get("/projects/{}/{}/nodes/{}/idlepc_proposals".format(self._project.id, self._node_type, self._id), timeout=240)).json
 
+    def _list_ports(self):
+        """
+        Generate the list of port display in the client
+        if the compute has sent a list we return it (use by
+        node where you can not personnalize the port naming).
+        """
+        ports = []
+        interface_number = segment_number = 0
+
+        if "serial_adapters" in self.properties:
+            for adapter_number in range(0, self.properties["serial_adapters"]):
+                for port_number in range(0, self._port_by_adapter):
+                    ports.append(PortFactory("Serial{}/{}".format(adapter_number, port_number), adapter_number, port_number, "serial"))
+
+        if "ethernet_adapters" in self.properties:
+            ethernet_adapters = self.properties["ethernet_adapters"]
+        else:
+            ethernet_adapters = self.properties.get("adapters", 1)
+
+        for adapter_number in range(0, ethernet_adapters):
+            for port_number in range(0, self._port_by_adapter):
+                if self._first_port_name and adapter_number == 0:
+                    port_name = self._first_port_name
+                else:
+                    port_name = self._port_name_format.format(
+                        interface_number,
+                        segment_number,
+                        adapter=adapter_number,
+                        port=port_number,
+                        port0=interface_number,
+                        port1=1 + interface_number,
+                        segment0=segment_number,
+                        segment1=1 + segment_number)
+                    interface_number += 1
+                    if self._port_segment_size and interface_number % self._port_segment_size == 0:
+                        segment_number += 1
+                        interface_number = 0
+
+                if self._port_by_adapter > 1:
+                    short_name = "e{}/{}".format(adapter_number, port_number)
+                else:
+                    short_name = "e{}".format(adapter_number)
+
+                ports.append(PortFactory(port_name, adapter_number, port_number, "ethernet"))
+        return ports
+
     def __repr__(self):
         return "<gns3server.controller.Node {} {}>".format(self._node_type, self._name)
 
@@ -504,5 +556,6 @@ class Node:
             "symbol": self._symbol,
             "port_name_format": self._port_name_format,
             "port_segment_size": self._port_segment_size,
-            "first_port_name": self._first_port_name
+            "first_port_name": self._first_port_name,
+            "ports": [port.__json__() for port in self._list_ports()]
         }
