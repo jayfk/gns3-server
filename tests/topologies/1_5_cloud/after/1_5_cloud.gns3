@@ -36,7 +36,7 @@
                 "properties": {
                     "interfaces": [
                     ],
-                    "ports": [
+                    "ports_mapping": [
                         {
                             "interface": "bridge0",
                             "name": "bridge0",

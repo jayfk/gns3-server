@@ -35,7 +35,7 @@ log = logging.getLogger(__name__)
 class Node:
     # This properties are used only on controller and are not forwarded to the compute
     CONTROLLER_ONLY_PROPERTIES = ["x", "y", "z", "width", "height", "symbol", "label", "console_host",
-                                  "port_name_format", "first_port_name", "port_segment_size"]
+                                  "port_name_format", "first_port_name", "port_segment_size", "ports"]
 
     def __init__(self, project, compute, name, node_id=None, node_type=None, **kwargs):
         """
@@ -463,8 +463,17 @@ class Node:
         node where you can not personnalize the port naming).
         """
         ports = []
-        interface_number = segment_number = 0
+        # Some special cases
+        if self._node_type == "atm_switch":
+            for adapter_number in range(0, len(self.properties["mappings"])):
+                ports.append(PortFactory("ATM{}".format(adapter_number), adapter_number, 0, "atm"))
+            return ports
+        elif self._node_type == "frame_relay_switch":
+            for adapter_number in range(0, len(self.properties["mappings"])):
+                ports.append(PortFactory("FrameRelay{}".format(adapter_number), adapter_number, 0, "frame_relay"))
+            return ports
 
+        interface_number = segment_number = 0
         if "serial_adapters" in self.properties:
             for adapter_number in range(0, self.properties["serial_adapters"]):
                 for port_number in range(0, self._port_by_adapter):

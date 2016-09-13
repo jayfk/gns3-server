@@ -181,6 +181,42 @@ NODE_OBJECT_SCHEMA = {
         "first_port_name": {
             "description": "Name of the first port",
             "type": ["string", "null"],
+        },
+        "ports": {
+            "description": "List of node ports READ only",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "A node port",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Port name",
+                    },
+                    "short_name": {
+                        "type": "string",
+                        "description": "Short version of port name",
+                    },
+                    "adapter_number": {
+                        "type": "integer",
+                        "description": "Adapter slot"
+                    },
+                    "port_number": {
+                        "type": "integer",
+                        "description": "Port slot"
+                    },
+                    "link_type": {
+                        "description": "Type of link",
+                        "enum": ["ethernet", "serial"]
+                    },
+                    "data_link_types": {
+                        "type": "object",
+                        "description": "Available PCAP type for capture",
+                        "properties": {}
+                    },
+                },
+                "additionalProperties": False
+            }
         }
     },
     "additionalProperties": False,

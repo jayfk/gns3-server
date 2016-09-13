@@ -61,7 +61,7 @@
                 "port_segment_size": 0,
                 "first_port_name": null,
                 "properties": {
-                    "ports": [
+                    "ports_mapping": [
                         {
                             "name": "Ethernet1",
                             "port_number": 1
@@ -119,7 +119,7 @@
                 "port_segment_size": 0,
                 "first_port_name": null,
                 "properties": {
-                    "ports": [
+                    "ports_mapping": [
                         {
                             "name": "Ethernet1",
                             "port_number": 1,

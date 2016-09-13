@@ -36,7 +36,7 @@
                 "properties": {
                     "interfaces": [
                     ],
-                    "ports": [
+                    "ports_mapping": [
                       {"interface": "bridge0", "port_number": 1, "type": "ethernet", "name": "bridge0"},
                       {"interface": "en0", "port_number": 2, "type": "ethernet", "name": "en0"},
                       {"interface": "en1", "port_number": 3, "type": "ethernet", "name": "en1"},

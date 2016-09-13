@@ -199,21 +199,21 @@ def _convert_1_3_later(topo, topo_path):
             node["console_type"] = None
         elif old_node["type"] == "EthernetHub":
             node["node_type"] = "ethernet_hub"
-            node["symbol"] = ":/symbols/hub.svg"
             node["console_type"] = None
-            node["properties"]["ports"] = []
+            node["symbol"] = ":/symbols/hub.svg"
+            node["properties"]["ports_mapping"] = []
             for port in old_node["ports"]:
-                node["properties"]["ports"].append({
+                node["properties"]["ports_mapping"].append({
                     "name": "Ethernet{}".format(port["port_number"]),
                     "port_number": port["port_number"]
                 })
         elif old_node["type"] == "EthernetSwitch":
             node["node_type"] = "ethernet_switch"
             node["symbol"] = ":/symbols/ethernet_switch.svg"
-            node["properties"]["ports"] = []
             node["console_type"] = None
+            node["properties"]["ports_mapping"] = []
             for port in old_node["ports"]:
-                node["properties"]["ports"].append({
+                node["properties"]["ports_mapping"].append({
                     "name": "Ethernet{}".format(port["port_number"]),
                     "port_number": port["port_number"],
                     "type": port["type"],
@@ -442,7 +442,7 @@ def _create_cloud(node, old_node, icon):
         }
         ports.append(port)
 
-    node["properties"]["ports"] = ports
+    node["properties"]["ports_mapping"] = ports
     node["properties"]["interfaces"] = []
 
 
