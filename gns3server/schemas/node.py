@@ -168,6 +168,19 @@ NODE_OBJECT_SCHEMA = {
         "z": {
             "description": "Z position of the node",
             "type": "integer"
+        },
+        "port_name_format": {
+            "description": "Formating for port name {0} will be replace by port number",
+            "type": "string"
+        },
+        "port_segment_size": {
+            "description": "Size of the port segment",
+            "type": "integer",
+            "minimum": 0
+        },
+        "first_port_name": {
+            "description": "Name of the first port",
+            "type": ["string", "null"],
         }
     },
     "additionalProperties": False,

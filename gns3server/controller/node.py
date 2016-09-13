@@ -33,7 +33,8 @@ log = logging.getLogger(__name__)
 
 class Node:
     # This properties are used only on controller and are not forwarded to the compute
-    CONTROLLER_ONLY_PROPERTIES = ["x", "y", "z", "width", "height", "symbol", "label", "console_host"]
+    CONTROLLER_ONLY_PROPERTIES = ["x", "y", "z", "width", "height", "symbol", "label", "console_host",
+                                  "port_name_format", "first_port_name", "port_segment_size"]
 
     def __init__(self, project, compute, name, node_id=None, node_type=None, **kwargs):
         """
@@ -69,12 +70,14 @@ class Node:
         self._y = 0
         self._z = 0
         self._symbol = None
-
-        # Update node properties with additional elements
+        self._port_name_format = "Ethernet{0}"
+        self._port_segment_size = 0
+        self._first_port_name = None
 
         # This properties will be recompute
         ignore_properties = ("width", "height")
 
+        # Update node properties with additional elements
         for prop in kwargs:
             if prop not in ignore_properties:
                 try:
@@ -219,6 +222,30 @@ class Node:
         # The text in label need to be always the node name
         val["text"] = self._name
         self._label = val
+
+    @property
+    def port_name_format(self):
+        return self._port_name_format
+
+    @port_name_format.setter
+    def port_name_format(self, val):
+        self._port_name_format = val
+
+    @property
+    def port_segment_size(self):
+        return self._port_segment_size
+
+    @port_segment_size.setter
+    def port_segment_size(self, val):
+        self._port_segment_size = val
+
+    @property
+    def first_port_name(self):
+        return self._first_port_name
+
+    @first_port_name.setter
+    def first_port_name(self, val):
+        self._first_port_name = val
 
     @asyncio.coroutine
     def create(self):
@@ -450,7 +477,10 @@ class Node:
                 "z": self._z,
                 "width": self._width,
                 "height": self._height,
-                "symbol": self._symbol
+                "symbol": self._symbol,
+                "port_name_format": self._port_name_format,
+                "port_segment_size": self._port_segment_size,
+                "first_port_name": self._first_port_name
             }
         return {
             "compute_id": str(self._compute.id),
@@ -471,5 +501,8 @@ class Node:
             "z": self._z,
             "width": self._width,
             "height": self._height,
-            "symbol": self._symbol
+            "symbol": self._symbol,
+            "port_name_format": self._port_name_format,
+            "port_segment_size": self._port_segment_size,
+            "first_port_name": self._first_port_name
         }

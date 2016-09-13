@@ -179,6 +179,9 @@ def _convert_1_3_later(topo, topo_path):
         node["x"] = int(old_node["x"])
         node["y"] = int(old_node["y"])
         node["z"] = int(old_node.get("z", 1))
+        node["port_name_format"] = old_node.get("port_name_format", "Ethernet{0}")
+        node["port_segment_size"] = int(old_node.get("port_segment_size", "0"))
+        node["first_port_name"] = old_node.get("first_port_name")
 
         node["properties"] = {}
 
