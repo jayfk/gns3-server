@@ -372,6 +372,7 @@ def test_list_ports_dynamips(project, compute):
     node.properties["slot0"] = "C7200-IO-FE"
     node.properties["slot1"] = "GT96100-FE"
     node.properties["wic0"] = "WIC-2T"
+    node.properties["wic1"] = "WIC-2T"
 
     assert node.__json__()["ports"] == [
         {
@@ -399,25 +400,47 @@ def test_list_ports_dynamips(project, compute):
             "link_type": "ethernet"
         },
         {
-            "name": "Serial0/0",
-            "short_name": "s0/0",
+            "name": "Serial0/16",
+            "short_name": "s0/16",
             "data_link_types": {
                 "Cisco HDLC": "DLT_C_HDLC",
                 "Cisco PPP": "DLT_PPP_SERIAL",
                 "Frame Relay": "DLT_FRELAY"},
-            "port_number": 0,
-            "adapter_number": 2,
+            "port_number": 16,
+            "adapter_number": 0,
             "link_type": "serial"
         },
         {
-            "name": "Serial0/1",
-            "short_name": "s0/1",
+            "name": "Serial0/17",
+            "short_name": "s0/17",
             "data_link_types": {
                 "Cisco HDLC": "DLT_C_HDLC",
                 "Cisco PPP": "DLT_PPP_SERIAL",
                 "Frame Relay": "DLT_FRELAY"},
-            "port_number": 1,
-            "adapter_number": 2,
+            "port_number": 17,
+            "adapter_number": 0,
+            "link_type": "serial"
+        },
+        {
+            "name": "Serial0/18",
+            "short_name": "s0/18",
+            "data_link_types": {
+                "Cisco HDLC": "DLT_C_HDLC",
+                "Cisco PPP": "DLT_PPP_SERIAL",
+                "Frame Relay": "DLT_FRELAY"},
+            "port_number": 18,
+            "adapter_number": 0,
+            "link_type": "serial"
+        },
+        {
+            "name": "Serial0/19",
+            "short_name": "s0/19",
+            "data_link_types": {
+                "Cisco HDLC": "DLT_C_HDLC",
+                "Cisco PPP": "DLT_PPP_SERIAL",
+                "Frame Relay": "DLT_FRELAY"},
+            "port_number": 19,
+            "adapter_number": 0,
             "link_type": "serial"
         }
     ]

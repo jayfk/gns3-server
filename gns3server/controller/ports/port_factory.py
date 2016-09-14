@@ -45,6 +45,46 @@ class PortFactory:
         return PORTS[port_type](name, interface_number, adapter_number, port_number, **kwargs)
 
 
+class StandardPortFactory:
+    """
+    Create ports for standard device
+    """
+    def __new__(cls, properties, port_by_adapter, first_port_name, port_name_format, port_segment_size):
+        ports = []
+        interface_number = segment_number = 0
+        if "serial_adapters" in properties:
+            for adapter_number in range(0, properties["serial_adapters"]):
+                for port_number in range(0, port_by_adapter):
+                    ports.append(PortFactory("Serial{}/{}".format(adapter_number, port_number), adapter_number, adapter_number, port_number, "serial"))
+
+        if "ethernet_adapters" in properties:
+            ethernet_adapters = properties["ethernet_adapters"]
+        else:
+            ethernet_adapters = properties.get("adapters", 1)
+
+        for adapter_number in range(0, ethernet_adapters):
+            for port_number in range(0, port_by_adapter):
+                if first_port_name and adapter_number == 0:
+                    port_name = first_port_name
+                else:
+                    port_name = port_name_format.format(
+                        interface_number,
+                        segment_number,
+                        adapter=adapter_number,
+                        port=port_number,
+                        port0=interface_number,
+                        port1=1 + interface_number,
+                        segment0=segment_number,
+                        segment1=1 + segment_number)
+                    interface_number += 1
+                    if port_segment_size and interface_number % port_segment_size == 0:
+                        segment_number += 1
+                        interface_number = 0
+
+                ports.append(PortFactory(port_name, adapter_number, adapter_number, port_number, "ethernet"))
+        return ports
+
+
 class DynamipsPortFactory:
     """
     Create port for dynamips devices
@@ -118,6 +158,7 @@ class DynamipsPortFactory:
         interface_numbers = {}
 
         adapter_number = 0
+        wic_port_number = 16
         for name in sorted(properties.keys()):
             if name.startswith("slot") and properties[name]:
                 port_class = cls.ADAPTER_MATRIX[properties[name]]["port"]
@@ -132,11 +173,8 @@ class DynamipsPortFactory:
             elif name.startswith("wic") and properties[name]:
                 port_class = cls.WIC_MATRIX[properties[name]]["port"]
                 if port_class:
-                    interface_numbers.setdefault(port_class, 0)
-                    interface_number = interface_numbers[port_class]
                     for port_number in range(0, cls.WIC_MATRIX[properties[name]]["nb_ports"]):
-                        name = "{}{}/{}".format(port_class.longNameType(), interface_number, port_number)
-                        ports.append(port_class(name, interface_number, adapter_number, port_number))
-                    interface_numbers[port_class] += 1
-                adapter_number += 1
+                        name = "{}{}/{}".format(port_class.longNameType(), 0, wic_port_number)
+                        ports.append(port_class(name, 0, 0, wic_port_number))
+                        wic_port_number += 1
         return ports

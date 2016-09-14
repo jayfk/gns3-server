@@ -25,6 +25,16 @@ from .serial_port import SerialPort
 class FrameRelayPort(SerialPort):
 
     @staticmethod
+    def longNameType():
+        """
+        Returns the long name type for this port.
+
+        :returns: string
+        """
+
+        return "FrameRelay"
+
+    @staticmethod
     def dataLinkTypes():
         """
         Returns the supported PCAP DLTs.
