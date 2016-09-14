@@ -21,7 +21,8 @@ class Port:
     Base class for port objects.
     """
 
-    def __init__(self, name, adapter_number, port_number):
+    def __init__(self, name, interface_number, adapter_number, port_number):
+        self._interface_number = interface_number
         self._adapter_number = adapter_number
         self._port_number = port_number
         self._name = name
@@ -42,7 +43,7 @@ class Port:
     def __json__(self):
         return {
             "name": self._name,
-            "short_name": self.shortNameType() + "{}/{}".format(self._adapter_number, self._port_number),
+            "short_name": self.shortNameType() + "{}/{}".format(self._interface_number, self._port_number),
             "data_link_types": self.dataLinkTypes(),
             "port_number": self._port_number,
             "adapter_number": self._adapter_number,

@@ -23,7 +23,7 @@ import os
 
 
 from .compute import ComputeConflict
-from .ports.port_factory import PortFactory
+from .ports.port_factory import PortFactory, DynamipsPortFactory
 from ..utils.images import images_directories
 from ..utils.qt import qt_font_to_style
 
@@ -466,18 +466,20 @@ class Node:
         # Some special cases
         if self._node_type == "atm_switch":
             for adapter_number in range(0, len(self.properties["mappings"])):
-                ports.append(PortFactory("ATM{}".format(adapter_number), adapter_number, 0, "atm"))
+                ports.append(PortFactory("ATM{}".format(adapter_number), adapter_number, adapter_number, 0, "atm"))
             return ports
         elif self._node_type == "frame_relay_switch":
             for adapter_number in range(0, len(self.properties["mappings"])):
-                ports.append(PortFactory("FrameRelay{}".format(adapter_number), adapter_number, 0, "frame_relay"))
+                ports.append(PortFactory("FrameRelay{}".format(adapter_number), adapter_number, adapter_number, 0, "frame_relay"))
             return ports
+        elif self._node_type == "dynamips":
+            return DynamipsPortFactory(self.properties)
 
         interface_number = segment_number = 0
         if "serial_adapters" in self.properties:
             for adapter_number in range(0, self.properties["serial_adapters"]):
                 for port_number in range(0, self._port_by_adapter):
-                    ports.append(PortFactory("Serial{}/{}".format(adapter_number, port_number), adapter_number, port_number, "serial"))
+                    ports.append(PortFactory("Serial{}/{}".format(adapter_number, port_number), adapter_number, adapter_number, port_number, "serial"))
 
         if "ethernet_adapters" in self.properties:
             ethernet_adapters = self.properties["ethernet_adapters"]
@@ -503,12 +505,7 @@ class Node:
                         segment_number += 1
                         interface_number = 0
 
-                if self._port_by_adapter > 1:
-                    short_name = "e{}/{}".format(adapter_number, port_number)
-                else:
-                    short_name = "e{}".format(adapter_number)
-
-                ports.append(PortFactory(port_name, adapter_number, port_number, "ethernet"))
+                ports.append(PortFactory(port_name, adapter_number, adapter_number, port_number, "ethernet"))
         return ports
 
     def __repr__(self):

@@ -15,14 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from .atm_port import ATMPort
 from .frame_relay_port import FrameRelayPort
 from .gigabitethernet_port import GigabitEthernetPort
 from .fastethernet_port import FastEthernetPort
 from .ethernet_port import EthernetPort
 from .serial_port import SerialPort
-
+from .pos_port import POSPort
 
 import logging
 log = logging.getLogger(__name__)
@@ -42,5 +41,102 @@ class PortFactory:
     Factory to create an Port object based on the type
     """
 
-    def __new__(cls, name, adapter_number, port_number, port_type, **kwargs):
-        return PORTS[port_type](name, adapter_number, port_number, **kwargs)
+    def __new__(cls, name, interface_number, adapter_number, port_number, port_type, **kwargs):
+        return PORTS[port_type](name, interface_number, adapter_number, port_number, **kwargs)
+
+
+class DynamipsPortFactory:
+    """
+    Create port for dynamips devices
+    """
+    ADAPTER_MATRIX = {
+        "C1700-MB-1FE": {"nb_ports": 1,
+                         "port": FastEthernetPort},
+        "C1700-MB-WIC1": {"nb_ports": 0,
+                          "port": None},
+        "C2600-MB-1E": {"nb_ports": 1,
+                        "port": EthernetPort},
+        "C2600-MB-1FE": {"nb_ports": 1,
+                         "port": FastEthernetPort},
+        "C2600-MB-2E": {"nb_ports": 2,
+                        "port": EthernetPort},
+        "C2600-MB-2FE": {"nb_ports": 2,
+                         "port": FastEthernetPort},
+        "C7200-IO-2FE": {"nb_ports": 2,
+                         "port": FastEthernetPort},
+        "C7200-IO-FE": {"nb_ports": 1,
+                        "port": FastEthernetPort},
+        "C7200-IO-GE-E": {"nb_ports": 1,
+                          "port": GigabitEthernetPort},
+        "GT96100-FE": {"nb_ports": 2,
+                       "port": FastEthernetPort},
+        "Leopard-2FE": {"nb_ports": 2,
+                        "port": FastEthernetPort},
+        "NM-16ESW": {"nb_ports": 16,
+                     "port": FastEthernetPort},
+        "NM-1E": {"nb_ports": 1,
+                  "port": EthernetPort},
+        "NM-1FE-TX": {"nb_ports": 1,
+                      "port": FastEthernetPort},
+        "NM-4E": {"nb_ports": 4,
+                  "port": EthernetPort},
+        "NM-4T": {"nb_ports": 4,
+                  "port": SerialPort},
+        "PA-2FE-TX": {"nb_ports": 2,
+                      "port": FastEthernetPort},
+        "PA-4E": {"nb_ports": 4,
+                  "port": EthernetPort},
+        "PA-4T+": {"nb_ports": 4,
+                   "port": SerialPort},
+        "PA-8E": {"nb_ports": 8,
+                  "port": EthernetPort},
+        "PA-8T": {"nb_ports": 8,
+                  "port": SerialPort},
+        "PA-A1": {"nb_ports": 1,
+                  "port": ATMPort},
+        "PA-FE-TX": {"nb_ports": 1,
+                     "port": FastEthernetPort},
+        "PA-GE": {"nb_ports": 1,
+                  "port": GigabitEthernetPort},
+        "PA-POS-OC3": {"nb_ports": 1,
+                       "port": POSPort},
+    }
+
+    WIC_MATRIX = {"WIC-1ENET": {"nb_ports": 1,
+                                "port": EthernetPort},
+
+                  "WIC-1T": {"nb_ports": 1,
+                             "port": SerialPort},
+
+                  "WIC-2T": {"nb_ports": 2,
+                             "port": SerialPort}
+                  }
+
+    def __new__(cls, properties):
+        ports = []
+
+        interface_numbers = {}
+
+        adapter_number = 0
+        for name in sorted(properties.keys()):
+            if name.startswith("slot") and properties[name]:
+                port_class = cls.ADAPTER_MATRIX[properties[name]]["port"]
+                if port_class:
+                    interface_numbers.setdefault(port_class, 0)
+                    interface_number = interface_numbers[port_class]
+                    for port_number in range(0, cls.ADAPTER_MATRIX[properties[name]]["nb_ports"]):
+                        name = "{}{}/{}".format(port_class.longNameType(), interface_number, port_number)
+                        ports.append(port_class(name, interface_number, adapter_number, port_number))
+                    interface_numbers[port_class] += 1
+                adapter_number += 1
+            elif name.startswith("wic") and properties[name]:
+                port_class = cls.WIC_MATRIX[properties[name]]["port"]
+                if port_class:
+                    interface_numbers.setdefault(port_class, 0)
+                    interface_number = interface_numbers[port_class]
+                    for port_number in range(0, cls.WIC_MATRIX[properties[name]]["nb_ports"]):
+                        name = "{}{}/{}".format(port_class.longNameType(), interface_number, port_number)
+                        ports.append(port_class(name, interface_number, adapter_number, port_number))
+                    interface_numbers[port_class] += 1
+                adapter_number += 1
+        return ports
