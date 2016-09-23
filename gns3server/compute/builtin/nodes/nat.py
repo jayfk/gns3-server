@@ -35,8 +35,8 @@ class Nat(Cloud):
         ports = [
             {
                 "name": "nat0",
-                "type": "ethernet",
-                "interface": "virbr0",
+                "type": "tap",
+                "interface": "nat0",
                 "port_number": 0
             }
         ]

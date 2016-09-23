@@ -198,8 +198,8 @@ class Cloud(BaseNode):
 
                     if sys.platform.startswith("linux"):
                         # use raw sockets on Linux
-                        yield from self._ubridge_send('bridge add_nio_linux_raw {name} "{interface}"'.format(name=bridge_name,
-                                                                                                             interface=port_info["interface"]))
+                        yield from self._ubridge_send('bridge add_nio_ethernet {name} "{interface}"'.format(name=bridge_name,
+                                                                                                            interface=port_info["interface"]))
                     else:
                         if sys.platform.startswith("darwin"):
                             # Wireless adapters are not well supported by the libpcap on OSX
@@ -214,8 +214,9 @@ class Cloud(BaseNode):
                                                                                                                 interface=port_info["interface"]))
 
                 elif port_info["type"] == "tap":
-                    yield from self._ubridge_send('bridge add_nio_tap {name} "{interface}"'.format(name=bridge_name,
-                                                                                                   interface=port_info["interface"]))
+                    yield from self._ubridge_send('bridge add_nio_tap {name} "{interface}"'.format(name=bridge_name, interface=port_info["interface"]))
+                    if port_info["interface"].startswith("nat"):
+                        yield from self._ubridge_send('brctl addif virbr0 "{interface}"'.format(interface=port_info["interface"]))
 
         elif port_info["type"] == "udp":
             yield from self._ubridge_send('bridge add_nio_udp {name} {lport} {rhost} {rport}'.format(name=bridge_name,
